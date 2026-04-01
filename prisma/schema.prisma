@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Énumérations ---
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// --- Modèles ---
+
+model User {
+  id        Int      @id @default(autoincrement()) @map("idUser")
+  username  String   @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  activated Boolean  @default(true)
+
+  // Relationsy
+  refreshTokens RefreshToken[]
+  manages       Manage[]
+  handles       Handle[]
+
+  @@map("user")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_token")
+}
+
+model Information {
+  id              Int      @id @default(autoincrement()) @map("idInformation")
+  title           String
+  description     String
+  content         String
+  category        String
+  publicationDate DateTime @default(now())
+  status          Boolean  @default(true)
+
+  // Relations
+  manages Manage[]
+
+  @@map("information")
+}
+
+model Manage {
+  userId        Int
+  informationId Int
+  updateDate    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  information Information @relation(fields: [informationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, informationId])
+  @@map("manage")
+}
+
+model Exercise {
+  id           Int      @id @default(autoincrement()) @map("idExercise")
+  title        String
+  description  String
+  duration     Int
+  instructions String
+
+  // Relations
+  handles  Handle[]
+  composes Compose[]
+
+  @@map("exercise")
+}
+
+model Handle {
+  userId     Int
+  exerciseId Int
+  updateDate DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@id([userId, exerciseId])
+  @@map("handle")
+}
+
+model RespirationPhase {
+  id                   Int       @id @default(autoincrement()) @map("idRespirationPhase")
+  respirationPhaseName String
+
+  // Relations
+  composes Compose[]
+
+  @@map("respiration_phase")
+}
+
+model Compose {
+  exerciseId         Int
+  respirationPhaseId Int
+  phaseOrder         Int
+  durationSeconds    Int
+
+  exercise         Exercise         @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  respirationPhase RespirationPhase @relation(fields: [respirationPhaseId], references: [id], onDelete: Cascade)
+
+  @@id([exerciseId, respirationPhaseId])
+  @@map("compose")
+}
