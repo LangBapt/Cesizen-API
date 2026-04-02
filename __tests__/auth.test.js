@@ -1,6 +1,6 @@
 const request = require("supertest");
 const { app, server } = require("../server");
-const prisma = require('../config/prisma');
+const prisma = require('../src/config/prisma');
 
 afterAll(async () => {
   await prisma.refreshToken.deleteMany({ where: { user: { email: { contains: "@test-cesizen.fr" } } } });
