@@ -18,11 +18,9 @@ jobs:
           
       - name: Install Dependencies
         run: npm install 
-        working-directory: ./api
 
       - name: Run Linter
-        run: npx eslint src 
-        working-directory: ./api
+        run: npm run lint
 
   test:
     runs-on: ubuntu-latest
@@ -48,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - run: npm ci
@@ -116,6 +114,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
           tags: |
             ghcr.io/langbapt/cesizen-api:${{ steps.env.outputs.tag }}
