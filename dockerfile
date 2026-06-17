@@ -13,7 +13,7 @@ COPY src ./src
 
 # Génère le client Prisma, puis élague les devDependencies
 RUN npx prisma generate
-RUN npm prune --omit=dev
+RUN npm prune --omit=dev 
 
 # ─── Stage 2 : runtime ──────────────────────────────────────────────
 FROM node:20-alpine AS runtime
